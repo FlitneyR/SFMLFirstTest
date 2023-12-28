@@ -1,0 +1,53 @@
+#include <soundManager.hpp>
+
+SoundManager SoundManager::s_singleton {};
+
+SoundManager& SoundManager::get() {
+    return s_singleton;
+}
+
+sf::SoundBuffer& SoundManager::loadSound(const std::string& fileName) {
+    auto it = m_soundBuffers.find(fileName);
+
+    if (it == m_soundBuffers.end()) {
+        sf::SoundBuffer& soundBuffer = m_soundBuffers[fileName];
+
+        if (!soundBuffer.loadFromFile(fileName))
+            throw std::runtime_error("Couldn't load sound from: " + fileName);
+        
+        return soundBuffer;
+    } else {
+        return it->second;
+    }
+}
+
+void SoundManager::playSound(sf::SoundBuffer& soundBuffer) {
+    // auto sound = std::make_unique<sf::Sound>(soundBuffer);
+    // sf::Sound sound(soundBuffer);
+    // sound->play();
+    // m_playingSounds.push_back(std::move(sound));
+    m_playingSounds.emplace_back(soundBuffer);
+    m_playingSounds.back().play();
+}
+
+void SoundManager::playMusic(const std::string& fileName) {
+    // auto music = std::make_unique<sf::Music>();
+    m_playingMusic.emplace_back();
+    sf::Music& music = m_playingMusic.back();
+
+    if (!music.openFromFile(fileName))
+        throw std::runtime_error("Failed to load music from: " + fileName);
+
+    music.play();
+}
+
+void SoundManager::cleanUpFinishedSounds() {
+    for (auto it = m_playingSounds.begin(); it != m_playingSounds.end();) {
+        if (it->getStatus() == sf::SoundSource::Status::Stopped) {
+            std::swap(*it, m_playingSounds.back());
+            m_playingSounds.pop_back();
+        } else {
+            it++;
+        }
+    }
+}
