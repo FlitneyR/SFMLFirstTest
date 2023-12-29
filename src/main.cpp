@@ -4,6 +4,10 @@
 #include <player.hpp>
 #include <tileSet.hpp>
 
+static const std::string BACKGROUND_MUSIC_PATH { "../assets/audio/Minifantasy_Dungeon_Music/Music/Goblins_Dance_(Battle).wav" };
+static const std::string MAP_TILESET_PATH { "../assets/sprites/Minifantasy_Dungeon_v2.2_Free_Version/Minifantasy_Dungeon_Assets/Tileset/Tileset.png" };
+static const std::string MAP_LAYOUT { "../assets/testScene.csv" };
+
 int main() {
     auto window = sf::RenderWindow{ { 1600u, 800u }, "SFML Test" };
     window.setFramerateLimit(144);
@@ -11,7 +15,7 @@ int main() {
     sf::Clock clock;
     sf::Time lastFrameStart = clock.getElapsedTime();
 
-    SoundManager::get().playMusic("../assets/audio/Minifantasy_Dungeon_Music/Music/Goblins_Dance_(Battle).wav");
+    SoundManager::get().playMusic(BACKGROUND_MUSIC_PATH);
     
     Player player;
 
@@ -22,7 +26,8 @@ int main() {
         static_cast<float>(windowSize.y / 2)
     };
 
-    TileSet tileSet("../assets/sprites/Minifantasy_Dungeon_v2.2_Free_Version/Minifantasy_Dungeon_Assets/Tileset/Tileset.png", 23, 14, 5, "../assets/testScene.csv");
+    TileSet map(MAP_TILESET_PATH, 23, 14, 5, MAP_LAYOUT);
+    map.addWallTypes({ 119, 220, 142, 143, 257, 280, 258, 143, 125, 148, 263, 286, 145, 168, 208, 231 });
 
     while (window.isOpen()) {
         for (auto event = sf::Event{}; window.pollEvent(event);) {
@@ -44,14 +49,18 @@ int main() {
         sf::Time currentFrameStart = clock.getElapsedTime();
         sf::Time deltaTime = currentFrameStart - lastFrameStart;
 
-        player.update(deltaTime.asSeconds());
+        player.movementUpdate(deltaTime.asSeconds());
+        player.animationUpdate(deltaTime.asSeconds());
+        player.tileSetCollisionUpdate(map);
 
         window.clear();
 
-        tileSet.draw(window);
+        map.draw(window);
         player.draw(window);
 
         window.display();
+
+        SoundManager::get().cleanUpFinishedSounds();
 
         lastFrameStart = currentFrameStart;
     }

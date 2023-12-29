@@ -29,6 +29,7 @@ public:
 
     static SoundManager& get();
 
+    void log() const;
     sf::SoundBuffer& loadSound(const std::string& fileName);
     void playSound(sf::SoundBuffer& soundBuffer);
     void playMusic(const std::string& fileName);

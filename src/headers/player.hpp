@@ -3,6 +3,7 @@
 #include <SFML/Audio.hpp>
 #include <spriteSheet.hpp>
 #include <soundManager.hpp>
+#include <tileSet.hpp>
 
 class Player {
     sf::SoundBuffer *r_attackSound,
@@ -32,7 +33,14 @@ public:
 
     Player();
 
+    sf::FloatRect getBounds();
+    SpriteSheet& getCurrentSpriteSheet();
+
     void draw(sf::RenderWindow& window);
-    void update(float deltaTime);
+
+    void movementUpdate(float deltaTime);
+    void tileSetCollisionUpdate(TileSet& tileSet);
+    void animationUpdate(float deltaTime);
+
     void attack();
 };

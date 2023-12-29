@@ -24,6 +24,7 @@ public:
     SpriteSheet() = default;
     SpriteSheet(const std::string& fileName, int rows, int columns, sf::FloatRect region = { { 0, 0 }, { 1, 1 } });
 
+    sf::FloatRect getBounds() { return m_sprite.getGlobalBounds(); }
     bool hasFinished();
     int getIndex();
     void setIndex(float index);

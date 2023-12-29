@@ -1,6 +1,11 @@
 #include <soundManager.hpp>
+#include <iostream>
 
 SoundManager SoundManager::s_singleton {};
+
+void SoundManager::log() const {
+    std::cout << m_playingMusic.size() << " music tracks and " << m_playingSounds.size() << " sounds playing" << std::endl;
+}
 
 SoundManager& SoundManager::get() {
     return s_singleton;
@@ -44,8 +49,7 @@ void SoundManager::playMusic(const std::string& fileName) {
 void SoundManager::cleanUpFinishedSounds() {
     for (auto it = m_playingSounds.begin(); it != m_playingSounds.end();) {
         if (it->getStatus() == sf::SoundSource::Status::Stopped) {
-            std::swap(*it, m_playingSounds.back());
-            m_playingSounds.pop_back();
+            m_playingSounds.erase(it++);
         } else {
             it++;
         }
