@@ -4,18 +4,15 @@
 
 Player::Player() :
     m_attackSpriteSheet(
-        s_attackSpriteSheetPath,
-        1, 4,
+        s_attackSpriteSheetPath, 1, 4,
         { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
     ),
     m_walkSpriteSheet(
-        s_walkSpriteSheetPath,
-        1, 4,
+        s_walkSpriteSheetPath, 1, 4,
         { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
     ),
     m_idleSpriteSheet(
-        s_idleSpriteSheetPath,
-        1, 16,
+        s_idleSpriteSheetPath, 1, 16,
         { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
     )
 {
@@ -60,8 +57,7 @@ sf::Vector2f Player::getFacingDirection() {
 }
 
 void Player::draw(sf::RenderWindow& window) {
-    SpriteSheet& spriteSheet = getCurrentSpriteSheet();
-
+    SpriteSheet& spriteSheet = getCurrentSpriteSheet();    
     spriteSheet.m_sprite.setPosition(m_position);
     spriteSheet.draw(window);
 }
@@ -119,21 +115,17 @@ void Player::animationUpdate(float deltaTime) {
 }
 
 void Player::tileSetCollisionUpdate(TileSet& tileSet) {
+    sf::FloatRect playerBounds = getBounds();
+
     sf::Vector2i offset, playerCell = tileSet.getCellAtPosition(m_position);
     for (offset.y = -1; offset.y <= 1; offset.y++)
     for (offset.x = -1; offset.x <= 1; offset.x++)
     if (!(offset.x && offset.y)) {
-        sf::Vector2i cell {
-            playerCell.x + offset.x,
-            playerCell.y + offset.y
-        };
+        sf::Vector2i cell = playerCell + offset;
 
-        sf::FloatRect playerBounds = getBounds();
         sf::FloatRect tileBounds = tileSet.getCellBounds(cell);
 
-        if (tileSet.isWallType(tileSet.getCellType(cell)) &&
-            playerBounds.intersects(tileBounds))
-        {
+        if (tileSet.isWallType(tileSet.getCellType(cell)) && playerBounds.intersects(tileBounds)) {
             sf::Vector2f tileCentre = tileBounds.getPosition() + tileBounds.getSize() * 0.5f;
             sf::Vector2f deltaPosition = m_position - tileCentre;
 

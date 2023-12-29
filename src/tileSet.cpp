@@ -6,7 +6,7 @@ TileSet::TileSet(
     const std::string& textureFilename,
     int tileSetColumns,
     int tileSetRows,
-    int scale,
+    float scale,
     const std::string& layoutFilename
 )   :
     m_tileSetRows(tileSetRows),
@@ -28,6 +28,39 @@ TileSet::TileSet(
         m_cells[i + j * m_gridColumns] = std::atoi(layout.getCell(j, i).c_str());
     
     updateVertices();
+}
+
+TileSet::TileSet(
+    const std::string& textureFilename,
+    int tileSetColumns,
+    int tileSetRows,
+    float scale,
+    int gridColumns,
+    int gridRows
+)   :
+    m_tileSetRows(tileSetRows),
+    m_tileSetColumns(tileSetColumns),
+    m_scale(scale),
+    m_gridColumns(gridColumns),
+    m_gridRows(gridRows),
+    m_cells(gridRows * gridColumns, 0)
+{
+    if (!m_texture.loadFromFile(textureFilename))
+        throw std::runtime_error("Failed to open tileset texture: " + textureFilename);
+    
+    updateVertices();
+}
+
+void TileSet::saveToFile(const std::string& layoutFilename) {
+    std::ofstream file(layoutFilename);
+
+    for (int row = 0; row < m_gridRows; row++)
+    for (int column = 0; column < m_gridColumns; column++) {
+        file << getCellType({ column, row });
+
+        if (column + 1 < m_gridColumns) file << ", ";
+        else file << '\n';
+    }
 }
 
 void TileSet::updateVertices() {
@@ -73,7 +106,7 @@ void TileSet::updateVertices() {
     }
 }
 
-int TileSet::getCellType(const sf::Vector2i& cell) {
+int& TileSet::getCellType(const sf::Vector2i& cell) {
     return m_cells[cell.x + cell.y * m_gridColumns];
 }
 

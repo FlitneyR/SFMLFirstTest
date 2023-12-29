@@ -36,29 +36,25 @@ int main() {
     TileSet map(MAP_TILESET_PATH, 23, 14, 5, MAP_LAYOUT);
     map.addWallTypes({
         119, 220, 142, 143, 257, 280, 258, 143,
-        125, 148, 263, 286, 145, 168, 208, 231
+        125, 148, 263, 286, 145, 168, 208, 231,
+        162, 240, 263, 286, 258, 283
     });
 
     sf::View view(player.m_position, sf::Vector2f(window.getSize()));
 
     while (window.isOpen()) {
-        for (auto event = sf::Event{}; window.pollEvent(event);) {
-            switch (event.type) {
-            case sf::Event::Closed:
-                window.close();
+        for (auto event = sf::Event{}; window.pollEvent(event);)
+        switch (event.type) {
+        case sf::Event::Closed: window.close(); break;
+        case sf::Event::Resized: view.setSize(event.size.width, event.size.height); break;
+        case sf::Event::KeyPressed:
+            switch (event.key.scancode) {
+            case sf::Keyboard::Scancode::Z:
+                player.attack();
                 break;
-            case sf::Event::Resized:
-                view.setSize(event.size.width, event.size.height);
-                break;
-            case sf::Event::KeyPressed:
-                switch (event.key.scancode) {
-                case sf::Keyboard::Scancode::Z:
-                    player.attack();
-                    break;
-                default: break;
-                }
             default: break;
             }
+        default: break;
         }
 
         sf::Time currentFrameStart = clock.getElapsedTime();
