@@ -14,7 +14,13 @@ class TileSet {
     int m_tileSetColumns;
     int m_gridRows;
     int m_gridColumns;
-    int m_scale;
+    float m_scale;
+
+    void updateVertices();
+    void setVertex(int index, sf::Vector2f position, sf::Vector2f texCoord) {
+        m_vertices[index].position = position;
+        m_vertices[index].texCoords = texCoord;
+    }
 
 public:
     TileSet(const std::string& textureFilename,
@@ -22,8 +28,12 @@ public:
             int tileSetRows,
             int scale,
             const std::string& layoutFilename);
+    
 
-    void addWallTypes(const std::vector<int>& indices) { for (auto index : indices) addWallType(index); }
+    void addWallTypes(const std::vector<int>& indices) {
+        for (auto index : indices) addWallType(index);
+    }
+    
     void addWallType(int index) { m_wallTypes.insert(index); }
 
     bool isWallType(int type) {

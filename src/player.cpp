@@ -46,6 +46,19 @@ SpriteSheet& Player::getCurrentSpriteSheet() {
                           m_idleSpriteSheet   ;
 }
 
+sf::Vector2f Player::getFacingDirection() {
+    static bool facingRight = true;
+    static bool facingForward = true;
+
+    facingRight   = (facingRight   || m_movement.x > s_movementThreshold) && m_movement.x >= -s_movementThreshold;
+    facingForward = (facingForward || m_movement.y > s_movementThreshold) && m_movement.y >= -s_movementThreshold;
+
+    return {
+        facingRight ? 1.f : -1.f,
+        facingForward ? 1.f : -1.f
+    };
+}
+
 void Player::draw(sf::RenderWindow& window) {
     SpriteSheet& spriteSheet = getCurrentSpriteSheet();
 
@@ -59,21 +72,25 @@ void Player::movementUpdate(float deltaTime) {
     bool upPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Up);
     bool downPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Down);
 
-    m_movement.x = rightPressed - leftPressed;
-    m_movement.y = downPressed - upPressed;
+    m_movement.x += static_cast<float>(rightPressed - leftPressed) * deltaTime * 5.f;
+    m_movement.y += static_cast<float>(downPressed - upPressed) * deltaTime * 5.f;
+    
+    float movementLength = std::sqrt(m_movement.x * m_movement.x + m_movement.y * m_movement.y);
+    if (movementLength > 1.f) m_movement /= movementLength;
 
     m_position += m_movement * m_movementSpeed * deltaTime;
+
+    float friction = 1.f / (10.f * deltaTime + 1.f);
+
+    if (!(leftPressed || rightPressed)) m_movement.x *= friction;
+    if (!(upPressed || downPressed)) m_movement.y *= friction;
 }
 
 void Player::animationUpdate(float deltaTime) {
     static bool wasMoving = false;
     static bool hadFootDown = false;
-    static bool facingRight = true;
-    static bool facingForward = true;
 
-    facingRight   = (facingRight   || m_movement.x > 0.1f) && m_movement.x >= -0.1f;
-    facingForward = (facingForward || m_movement.y > 0.1f) && m_movement.y >= -0.1f;
-    m_moving = std::abs(m_movement.x) > 0.1f || std::abs(m_movement.y) > 0.1f;
+    m_moving = std::abs(m_movement.x) > s_movementThreshold || std::abs(m_movement.y) > s_movementThreshold;
 
     // reset the looping sprite sheet that is not currently in use, so it doesn't start half way through
     if (m_moving) m_idleSpriteSheet.setIndex(0);
@@ -84,7 +101,8 @@ void Player::animationUpdate(float deltaTime) {
     if (m_footDown && !hadFootDown) SoundManager::get().playSound(*r_stepSound);
 
     // set the sprite sheets to use the correct animation for the facing direction
-    float rowIndex = (!facingForward << 1) + !facingRight;
+    sf::Vector2f facing = getFacingDirection();
+    float rowIndex = ((facing.y < 0) << 1) + (facing.x < 0);
     m_idleSpriteSheet.m_animationRegion.top = rowIndex / 4.f;
     m_walkSpriteSheet.m_animationRegion.top = rowIndex / 4.f;
     m_attackSpriteSheet.m_animationRegion.top = rowIndex / 4.f;

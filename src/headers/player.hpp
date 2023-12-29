@@ -16,10 +16,11 @@ class Player {
     bool m_moving = false;
     bool m_footDown = false;
     bool m_attacking = false;
-
     sf::Vector2f m_movement;
 
     float m_movementSpeed = 200.f;
+
+    static constexpr float s_movementThreshold = 0.25f;
 
     static constexpr char s_attackSpriteSheetPath[] = "../assets/sprites/Minifantasy_Dungeon_v2.2_Free_Version/Minifantasy_Dungeon_Assets/Characters/Human/Attack.png";
     static constexpr char s_idleSpriteSheetPath[] = "../assets/sprites/Minifantasy_Dungeon_v2.2_Free_Version/Minifantasy_Dungeon_Assets/Characters/Human/Idle.png";
@@ -29,12 +30,15 @@ class Player {
     static constexpr char s_walkSoundPath[] = "../assets/audio/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav";
 
 public:
-    sf::Vector2f m_position {};
+    sf::Vector2f m_position;
 
     Player();
 
     sf::FloatRect getBounds();
     SpriteSheet& getCurrentSpriteSheet();
+    sf::Vector2f getFacingDirection();
+
+    const sf::Vector2f& getMovement() { return m_movement; }
 
     void draw(sf::RenderWindow& window);
 
