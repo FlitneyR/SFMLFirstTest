@@ -5,7 +5,7 @@
 #include <string>
 
 class SpriteSheet {
-    sf::Texture m_texture;
+    sf::Texture* r_texture;
 
     sf::IntRect getCurrentSpriteRect();
     sf::Vector2f getTileSize();
@@ -22,9 +22,10 @@ public:
     float m_animationSpeed = 15.f;
 
     SpriteSheet() = default;
-    SpriteSheet(const std::string& fileName, int rows, int columns, sf::FloatRect region = { { 0, 0 }, { 1, 1 } });
+    SpriteSheet(sf::Texture& texture, int rows, int columns, sf::FloatRect region = { { 0, 0 }, { 1, 1 } });
 
-    sf::FloatRect getBounds() { return m_sprite.getGlobalBounds(); }
+    sf::Texture& getTexture() { return *r_texture; }
+
     bool hasFinished();
     int getIndex();
     void setIndex(float index);

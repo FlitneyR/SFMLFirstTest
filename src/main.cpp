@@ -37,7 +37,7 @@ int main() {
     map.addWallTypes({
         119, 220, 142, 143, 257, 280, 258, 143,
         125, 148, 263, 286, 145, 168, 208, 231,
-        162, 240, 263, 286, 258, 283
+        162, 240, 263, 286, 258, 283,  54,  77
     });
 
     sf::View view(player.m_position, sf::Vector2f(window.getSize()));

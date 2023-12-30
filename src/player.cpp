@@ -2,24 +2,22 @@
 #include <soundManager.hpp>
 #include <iostream>
 
+Player::Resources Player::Resources::s_singleton {};
+
 Player::Player() :
     m_attackSpriteSheet(
-        s_attackSpriteSheetPath, 1, 4,
-        { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
+        Resources::get().attackSpriteSheetTexture(),
+        1, 4, { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
     ),
     m_walkSpriteSheet(
-        s_walkSpriteSheetPath, 1, 4,
-        { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
+        Resources::get().walkSpriteSheetTexture(),
+        1, 4, { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
     ),
     m_idleSpriteSheet(
-        s_idleSpriteSheetPath, 1, 16,
-        { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
+        Resources::get().idleSpriteSheetTexture(),
+        1, 16, { { 0.f, 0.f }, { 1.f, 1.f / 4.f } }
     )
 {
-    auto& soundManager = SoundManager::get();
-    r_attackSound = &soundManager.loadSound(s_attackSoundPath);
-    r_stepSound = &soundManager.loadSound(s_walkSoundPath);
-
     m_attackSpriteSheet.m_sprite.setScale({ 5.f, 5.f });
     m_attackSpriteSheet.m_loop = false;
 
@@ -94,7 +92,8 @@ void Player::animationUpdate(float deltaTime) {
 
     m_footDown = m_moving && (m_walkSpriteSheet.getIndex() % 2 == 1);
 
-    if (m_footDown && !hadFootDown) SoundManager::get().playSound(*r_stepSound);
+    if (m_footDown && !hadFootDown)
+        SoundManager::get().playSound(Resources::get().stepSound());
 
     // set the sprite sheets to use the correct animation for the facing direction
     sf::Vector2f facing = getFacingDirection();
@@ -145,5 +144,5 @@ void Player::attack() {
 
     m_attacking = true;
     m_attackSpriteSheet.setIndex(0);
-    SoundManager::get().playSound(*r_attackSound);
+    SoundManager::get().playSound(Resources::get().attackSound());
 }

@@ -1,12 +1,9 @@
 #include <spriteSheet.hpp>
 
-SpriteSheet::SpriteSheet(const std::string& fileName, int rows, int columns, sf::FloatRect region) :
-    m_rows(rows), m_columns(columns), m_index(0), m_animationRegion(region)
+SpriteSheet::SpriteSheet(sf::Texture& texture, int rows, int columns, sf::FloatRect region) :
+    m_rows(rows), m_columns(columns), m_index(0), m_animationRegion(region), r_texture(&texture)
 {
-    if (!m_texture.loadFromFile(fileName))
-        throw std::runtime_error("Failed to load texture from file: " + fileName);
-
-    m_sprite.setTexture(m_texture);
+    m_sprite.setTexture(getTexture());
 }
 
 bool SpriteSheet::hasFinished() {
@@ -37,7 +34,7 @@ void SpriteSheet::draw(sf::RenderTarget& target) {
 }
 
 sf::Vector2f SpriteSheet::getTileSize() {
-    sf::Vector2u textureSize = m_texture.getSize();
+    sf::Vector2u textureSize = getTexture().getSize();
     return {
         textureSize.x * m_animationRegion.width / m_columns,
         textureSize.y * m_animationRegion.height / m_rows,
@@ -45,7 +42,7 @@ sf::Vector2f SpriteSheet::getTileSize() {
 }
 
 sf::IntRect SpriteSheet::getCurrentSpriteRect() {
-    sf::Vector2u textureSize = m_texture.getSize();
+    sf::Vector2u textureSize = getTexture().getSize();
 
     sf::Vector2i tileSize {
         static_cast<int>(m_animationRegion.width * textureSize.x / m_columns),
