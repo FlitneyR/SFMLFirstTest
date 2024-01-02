@@ -110,6 +110,21 @@ int& TileSet::getCellType(const sf::Vector2i& cell) {
     return m_cells[cell.x + cell.y * m_gridColumns];
 }
 
+sf::FloatRect TileSet::getBounds() const {
+    sf::Vector2u textureSize = m_texture.getSize();
+    sf::Vector2f tileSize {
+        textureSize.x / static_cast<float>(m_tileSetColumns),
+        textureSize.y / static_cast<float>(m_tileSetRows)
+    };
+
+    sf::Vector2f gridSize = tileSize * m_scale;
+
+    return sf::FloatRect {
+        { 0, 0 },
+        { gridSize.x * m_gridColumns, gridSize.y * m_gridRows }
+    };
+}
+
 sf::FloatRect TileSet::getCellBounds(const sf::Vector2i& cell) {
     sf::Vector2u textureSize = m_texture.getSize();
     sf::Vector2f tileSize {

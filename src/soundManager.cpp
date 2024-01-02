@@ -31,11 +31,13 @@ void SoundManager::playSound(sf::SoundBuffer& soundBuffer) {
     // sf::Sound sound(soundBuffer);
     // sound->play();
     // m_playingSounds.push_back(std::move(sound));
-    m_playingSounds.emplace_back(soundBuffer);
-    m_playingSounds.back().play();
+    if (m_playingSounds.size() < 100) {
+        m_playingSounds.emplace_back(soundBuffer);
+        m_playingSounds.back().play();
+    }
 }
 
-void SoundManager::playMusic(const std::string& fileName) {
+sf::Music& SoundManager::playMusic(const std::string& fileName) {
     // auto music = std::make_unique<sf::Music>();
     m_playingMusic.emplace_back();
     sf::Music& music = m_playingMusic.back();
@@ -44,6 +46,8 @@ void SoundManager::playMusic(const std::string& fileName) {
         throw std::runtime_error("Failed to load music from: " + fileName);
 
     music.play();
+    music.setLoop(true);
+    return music;
 }
 
 void SoundManager::cleanUpFinishedSounds() {

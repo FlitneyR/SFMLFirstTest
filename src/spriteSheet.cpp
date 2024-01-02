@@ -6,11 +6,11 @@ SpriteSheet::SpriteSheet(sf::Texture& texture, int rows, int columns, sf::FloatR
     m_sprite.setTexture(getTexture());
 }
 
-bool SpriteSheet::hasFinished() {
+bool SpriteSheet::hasFinished() const {
     return !m_loop && getIndex() >= m_rows * m_columns;
 }
 
-int SpriteSheet::getIndex() {
+int SpriteSheet::getIndex() const {
     return std::floor(m_index);
 }
 

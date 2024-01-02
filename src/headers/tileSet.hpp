@@ -61,6 +61,8 @@ public:
     int& operator[](const sf::Vector2i& cell) {
         return getCellType(cell);
     }
+    
+    sf::FloatRect getBounds() const;
 
     sf::FloatRect getCellBounds(const sf::Vector2i& cell);
     sf::Vector2i getCellAtPosition(sf::Vector2f position);

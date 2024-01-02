@@ -17,7 +17,7 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    auto window = sf::RenderWindow({ 1280u, 720u }, "Map Editor");
+    sf::RenderWindow window { { 1280u, 720u }, "Map Editor" };
     window.setFramerateLimit(144);
 
     sf::Clock clock;

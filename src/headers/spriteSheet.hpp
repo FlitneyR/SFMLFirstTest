@@ -26,8 +26,8 @@ public:
 
     sf::Texture& getTexture() { return *r_texture; }
 
-    bool hasFinished();
-    int getIndex();
+    bool hasFinished() const;
+    int getIndex() const;
     void setIndex(float index);
     void incrementIndex(float deltaTime);
     void draw(sf::RenderTarget& target);

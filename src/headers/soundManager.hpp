@@ -31,7 +31,7 @@ public:
 
     void log() const;
     sf::SoundBuffer& loadSound(const std::string& fileName);
+    sf::Music& playMusic(const std::string& fileName);
     void playSound(sf::SoundBuffer& soundBuffer);
-    void playMusic(const std::string& fileName);
     void cleanUpFinishedSounds();
 };

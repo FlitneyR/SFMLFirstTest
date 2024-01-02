@@ -11,8 +11,10 @@ FetchContent_MakeAvailable(SFML)
 
 include_directories(src/headers)
 
-add_executable(main src/main.cpp src/soundManager.cpp src/player.cpp src/spriteSheet.cpp src/tileSet.cpp src/csvParser.cpp)
+add_executable(main src/main.cpp src/soundManager.cpp src/player.cpp src/spriteSheet.cpp src/tileSet.cpp src/csvParser.cpp src/orc.cpp)
 add_executable(mapEditor src/mapEditor.cpp src/tileSet.cpp src/csvParser.cpp)
+add_executable(levelEditor src/levelEditor.cpp src/player.cpp src/orc.cpp src/tileSet.cpp src/csvParser.cpp src/spriteSheet.cpp src/soundManager.cpp)
 
 target_link_libraries(main sfml-graphics sfml-audio)
 target_link_libraries(mapEditor sfml-graphics)
+target_link_libraries(levelEditor sfml-graphics sfml-audio)

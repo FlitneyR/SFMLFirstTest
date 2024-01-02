@@ -1,6 +1,4 @@
 #include <player.hpp>
-#include <soundManager.hpp>
-#include <iostream>
 
 Player::Resources Player::Resources::s_singleton {};
 
@@ -19,6 +17,7 @@ Player::Player() :
     )
 {
     m_attackSpriteSheet.m_sprite.setScale({ 5.f, 5.f });
+    m_attackSpriteSheet.m_animationSpeed = 10.f;
     m_attackSpriteSheet.m_loop = false;
 
     m_idleSpriteSheet.m_sprite.setScale({ 5.f, 5.f });
@@ -28,7 +27,7 @@ Player::Player() :
     m_walkSpriteSheet.m_animationSpeed = 5.f;
 }
 
-sf::FloatRect Player::getBounds() {
+sf::FloatRect Player::getBounds() const {
     return {
         { m_position.x - 15.f, m_position.y - 15.f },
         { 30.f, 30.f }
@@ -41,7 +40,7 @@ SpriteSheet& Player::getCurrentSpriteSheet() {
                           m_idleSpriteSheet   ;
 }
 
-sf::Vector2f Player::getFacingDirection() {
+sf::Vector2f Player::getFacingDirection() const {
     static bool facingRight = true;
     static bool facingForward = true;
 
@@ -54,10 +53,10 @@ sf::Vector2f Player::getFacingDirection() {
     };
 }
 
-void Player::draw(sf::RenderWindow& window) {
-    SpriteSheet& spriteSheet = getCurrentSpriteSheet();    
+void Player::draw(sf::RenderTarget& target) {
+    SpriteSheet& spriteSheet = getCurrentSpriteSheet();
     spriteSheet.m_sprite.setPosition(m_position);
-    spriteSheet.draw(window);
+    spriteSheet.draw(target);
 }
 
 void Player::movementUpdate(float deltaTime) {
@@ -81,14 +80,9 @@ void Player::movementUpdate(float deltaTime) {
 }
 
 void Player::animationUpdate(float deltaTime) {
-    static bool wasMoving = false;
     static bool hadFootDown = false;
 
-    m_moving = std::abs(m_movement.x) > s_movementThreshold || std::abs(m_movement.y) > s_movementThreshold;
-
-    // reset the looping sprite sheet that is not currently in use, so it doesn't start half way through
-    if (m_moving) m_idleSpriteSheet.setIndex(0);
-    else          m_walkSpriteSheet.setIndex(0);
+    m_moving = std::sqrt(m_movement.x * m_movement.x + m_movement.y * m_movement.y) >= s_movementThreshold;
 
     m_footDown = m_moving && (m_walkSpriteSheet.getIndex() % 2 == 1);
 
@@ -97,7 +91,7 @@ void Player::animationUpdate(float deltaTime) {
 
     // set the sprite sheets to use the correct animation for the facing direction
     sf::Vector2f facing = getFacingDirection();
-    float rowIndex = ((facing.y < 0) << 1) + (facing.x < 0);
+    float rowIndex = ((facing.y < 0) << 1) | (facing.x < 0);
     m_idleSpriteSheet.m_animationRegion.top = rowIndex / 4.f;
     m_walkSpriteSheet.m_animationRegion.top = rowIndex / 4.f;
     m_attackSpriteSheet.m_animationRegion.top = rowIndex / 4.f;
@@ -109,7 +103,10 @@ void Player::animationUpdate(float deltaTime) {
 
     m_attacking &= !m_attackSpriteSheet.hasFinished();
 
-    wasMoving = m_moving;
+    // reset the looping sprite sheet that is not currently in use, so it doesn't start half way through
+    if (m_moving) m_idleSpriteSheet.setIndex(0);
+    else          m_walkSpriteSheet.setIndex(0);
+
     hadFootDown = m_footDown;
 }
 
@@ -137,6 +134,31 @@ void Player::tileSetCollisionUpdate(TileSet& tileSet) {
             }
         }
     }
+}
+
+std::optional<sf::FloatRect> Player::getSwordBounds() const {
+    if (!m_attacking) return {};
+    if (m_attackSpriteSheet.getIndex() <= 1) return {};
+    if (m_attackSpriteSheet.getIndex() >= 3) return {};
+
+    sf::Vector2f swordBoundsSize { 50.f, 40.f };
+
+    sf::Vector2f swordBoundsOffset = getFacingDirection();
+    swordBoundsOffset.x *= 18.f;
+    swordBoundsOffset.y *= 7.f;
+    swordBoundsOffset.y += 3.f;
+
+    return sf::FloatRect {
+        m_position + swordBoundsOffset
+                   - swordBoundsSize * 0.5f,
+        swordBoundsSize
+    };
+}
+
+bool Player::isSwordCollidingWith(const sf::FloatRect& bounds) const {
+    if (auto swordBounds = getSwordBounds())
+        return swordBounds->intersects(bounds);
+    else return false;
 }
 
 void Player::attack() {
