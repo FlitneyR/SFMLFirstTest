@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <random>
 
@@ -8,6 +9,7 @@
 #include <player.hpp>
 #include <tileSet.hpp>
 #include <orc.hpp>
+#include <csvParser.hpp>
 
 static const std::string BACKGROUND_MUSIC_PATH {
     "../assets/audio/Minifantasy_Dungeon_Music/Music/Goblins_Den_(Regular).wav"
@@ -21,11 +23,24 @@ static const std::string ORC_HIT_SOUND {
     "../assets/audio/Minifantasy_Dungeon_SFX/21_orc_damage_2.wav"
 };
 
-static const std::string MAP_TILESET_PATH {
-    "../assets/sprites/Minifantasy_Dungeon_v2.2_Free_Version/Minifantasy_Dungeon_Assets/Tileset/Tileset.png"
+static const std::string LEVEL_PATH { "../assets/testLevel.csv" };
+
+enum ObjectType : int {
+    e_None = 0,
+    e_Player,
+    e_Orc,
 };
 
-static const std::string MAP_LAYOUT { "../assets/testScene.csv" };
+std::map<std::string, ObjectType> s_objectNameToEnum {
+    { "PLAYER", e_Player },
+    { "ORC", e_Orc }
+};
+
+ObjectType parseObject(const std::string& name) {
+    auto it = s_objectNameToEnum.find(name);
+    if (it == s_objectNameToEnum.end()) return e_None;
+    else return it->second;
+}
 
 float randomFloat(float low = -1.f, float high = 1.f) {
     std::random_device rd;
@@ -41,18 +56,50 @@ int main() {
 
     sf::Music& backgroundMusic = SoundManager::get().playMusic(BACKGROUND_MUSIC_PATH);
     sf::Music& battleMusic = SoundManager::get().playMusic(BATTLE_MUSIC_PATH);
-    sf::SoundBuffer& orcHitSound = SoundManager::get().loadSound(ORC_HIT_SOUND);
-
     battleMusic.stop();
     
+    TileSet map;
     Player player;
-
     std::vector<Orc> orcs;
 
-    player.m_position = { 500.f, 500.f };
-    // orc.m_position = { 700.f, 500.f };
+    std::ifstream levelFile(LEVEL_PATH);
+    if (!levelFile.good())
+        throw std::runtime_error("Could not open level file: " + LEVEL_PATH);
+    
+    CSVParser csvParser { levelFile, false };
+    levelFile.close();
 
-    TileSet map(MAP_TILESET_PATH, 23, 14, 5, MAP_LAYOUT);
+    map = TileSet {
+                                     csvParser.getCell(0, 0),
+                           std::atoi(csvParser.getCell(0, 1).c_str()),
+                           std::atoi(csvParser.getCell(0, 2).c_str()),
+        static_cast<float>(std::atof(csvParser.getCell(0, 3).c_str())),
+                                     csvParser.getCell(0, 4)
+    };
+
+    for (int i = 1; i < csvParser.getRowCount(); i++) {
+        switch (parseObject(csvParser.getCell(i, 0))) {
+        case e_Player: {
+            player.m_position.x = std::atof(csvParser.getCell(i, 1).c_str());
+            player.m_position.y = std::atof(csvParser.getCell(i, 2).c_str());
+
+            break;
+        }
+        case e_Orc: {
+            orcs.emplace_back();
+            orcs.back().m_position.x = std::atof(csvParser.getCell(i, 1).c_str());
+            orcs.back().m_position.y = std::atof(csvParser.getCell(i, 2).c_str());
+
+            break;
+        }
+        default:
+            std::cerr << "Didn't recognise object name: "
+                        << csvParser.getCell(i, 0)
+                        << std::endl;
+            break;
+        }
+    }
+
     map.addWallTypes({
         119, 220, 142, 143, 257, 280, 258, 143,
         125, 148, 263, 286, 145, 168, 208, 231,
