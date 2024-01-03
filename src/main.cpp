@@ -42,14 +42,6 @@ ObjectType parseObject(const std::string& name) {
     else return it->second;
 }
 
-float randomFloat(float low = -1.f, float high = 1.f) {
-    std::random_device rd;
-    std::default_random_engine gen(rd());
-    std::uniform_real_distribution<float> dist(low, high);
-
-    return dist(gen);
-}
-
 int main() {
     sf::RenderWindow window { { 1280u, 720u }, "SFML Test" };
     window.setFramerateLimit(144);
@@ -100,12 +92,6 @@ int main() {
         }
     }
 
-    map.addWallTypes({
-        119, 220, 142, 143, 257, 280, 258, 143,
-        125, 148, 263, 286, 145, 168, 208, 231,
-        162, 240, 263, 286, 258, 283,  54,  77
-    });
-
     sf::FloatRect mapBounds = map.getBounds();
 
     sf::View view(player.m_position, sf::Vector2f(window.getSize()));
@@ -114,8 +100,6 @@ int main() {
     sf::Time lastFrameStart = clock.getElapsedTime();
 
     int hitCount = 0;
-
-    float newOrcTimer = 0.f;
 
     while (window.isOpen()) {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -133,19 +117,11 @@ int main() {
         }
 
         sf::Time currentFrameStart = clock.getElapsedTime();
-        sf::Time deltaTime = currentFrameStart - lastFrameStart;
+        float deltaTime = (currentFrameStart - lastFrameStart).asSeconds();
 
-        if ((newOrcTimer -= deltaTime.asSeconds()) <= 0.f) {
-            newOrcTimer = 3.f;
-
-            orcs.emplace_back();
-            orcs.back().m_position.x = randomFloat(mapBounds.left + 200.f, mapBounds.left + mapBounds.width - 200.f);
-            orcs.back().m_position.y = randomFloat(mapBounds.top + 200.f, mapBounds.top + mapBounds.height - 200.f);
-        }
-
-        player.movementUpdate(deltaTime.asSeconds());
+        player.movementUpdate(deltaTime);
         player.tileSetCollisionUpdate(map);
-        player.animationUpdate(deltaTime.asSeconds());
+        player.animationUpdate(deltaTime);
 
         for (auto it = orcs.begin(); it != orcs.end();) {
             auto& orc = *it;
@@ -153,10 +129,10 @@ int main() {
             bool orcHasReachedPlayer = orc.runTowards(player.m_position);
 
             if (!orc.isAttacking())
-                orc.movementUpdate(deltaTime.asSeconds());
+                orc.movementUpdate(deltaTime);
             
             orc.tileSetCollisionUpdate(map);
-            orc.updateAnimation(deltaTime.asSeconds());
+            orc.updateAnimation(deltaTime);
 
             if (orcHasReachedPlayer && orc.canAttack())
                 orc.attack();
@@ -174,7 +150,7 @@ int main() {
 
         sf::Vector2f viewCenter = view.getCenter();
         sf::Vector2f viewTarget = player.m_position + player.getMovement() * 250.f;
-        viewCenter = viewCenter + (viewTarget - viewCenter) * deltaTime.asSeconds();
+        viewCenter = viewCenter + (viewTarget - viewCenter) * deltaTime;
         view.setCenter(viewCenter);
 
         window.setView(view);

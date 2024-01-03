@@ -1,6 +1,8 @@
 #include <tileSet.hpp>
 #include <csvParser.hpp>
 #include <fstream>
+#include <string>
+#include <sstream>
 
 TileSet::TileSet(
     const std::string& textureFilename,
@@ -17,6 +19,15 @@ TileSet::TileSet(
         throw std::runtime_error("Failed to open tileset texture: " + textureFilename);
 
     std::ifstream layoutFile(layoutFilename);
+
+    std::string firstLine;
+    std::getline(layoutFile, firstLine);
+    std::stringstream firstLineStream(firstLine);
+
+    CSVParser wallTypes(firstLineStream, false);
+    for (const auto& type : wallTypes.getRow(0))
+        addWallType(std::atoi(type.c_str()));
+
     CSVParser layout(layoutFile, false);
     
     m_gridColumns = layout.getColumnCount();
@@ -54,11 +65,15 @@ TileSet::TileSet(
 void TileSet::saveToFile(const std::string& layoutFilename) {
     std::ofstream file(layoutFilename);
 
+    for (const auto& wallType : m_wallTypes)
+        file << wallType << ',';
+    file << std::endl;
+
     for (int row = 0; row < m_gridRows; row++)
     for (int column = 0; column < m_gridColumns; column++) {
         file << getCellType({ column, row });
 
-        if (column + 1 < m_gridColumns) file << ", ";
+        if (column + 1 < m_gridColumns) file << ',';
         else file << '\n';
     }
 }

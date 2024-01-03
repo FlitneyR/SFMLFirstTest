@@ -84,6 +84,13 @@ int main(int argc, const char** argv) {
         case sf::Event::MouseButtonPressed:
             if (event.mouseButton.button == sf::Mouse::Button::Left && mouseOnPallet)
                 currentBrush = currentTile;
+            if (event.mouseButton.button == sf::Mouse::Button::Right && mouseOnPallet) {
+                const int& type = tileSet.getCellType(currentTile);
+                if (map.isWallType(type))
+                    map.removeWallType(type);
+                else
+                    map.addWallType(type);
+            }
             break;
         default: break;
         }
@@ -120,6 +127,12 @@ int main(int argc, const char** argv) {
 
         if (mouseOnPallet) tileSet.highlightCell(window, currentTile, { 0, 255, 0, 50 });
         tileSet.highlightCell(window, currentBrush, { 0, 0, 255, 50 });
+
+        sf::Vector2i cell;
+        for (cell.y = 0; cell.y < tileSet.gridRows(); cell.y++)
+        for (cell.x = 0; cell.x < tileSet.gridColumns(); cell.x++)
+        if (map.isWallType(tileSet.getCellType(cell)))
+            tileSet.highlightCell(window, cell, { 255, 0, 0, 50 });
 
         window.display();
 

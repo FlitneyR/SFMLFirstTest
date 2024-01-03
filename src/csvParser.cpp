@@ -64,10 +64,14 @@ const std::vector<std::string>& CSVParser::getColumnNames() const {
     return m_columnNames;
 }
 
+std::vector<std::string>& CSVParser::getRow(unsigned int row) {
+    return m_rows[row];
+}
+
 std::string& CSVParser::getCell(unsigned int row, unsigned int column) {
-    return m_rows[row][column];
+    return getRow(row)[column];
 }
 
 std::string& CSVParser::getCell(unsigned int row, const std::string& column) {
-    return m_rows[row][getColumnIndex(column)];
+    return getRow(row)[getColumnIndex(column)];
 }

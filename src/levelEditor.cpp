@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         mapScale       = std::atof(csvParser.getCell(0, 3).c_str());
         mapFilePath    =           csvParser.getCell(0, 4);
 
-        for (int i = 1; i < csvParser.getRowCount(); i++) {
+        for (int i = 2; i < csvParser.getRowCount(); i++) {
             switch (parseObject(csvParser.getCell(i, 0))) {
             case e_Player: {
                 player.m_position.x = std::atof(csvParser.getCell(i, 1).c_str());

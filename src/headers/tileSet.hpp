@@ -37,6 +37,11 @@ public:
             int gridColumns,
             int gridRows);
 
+    const int& tileSetRows() { return m_tileSetRows; }
+    const int& tileSetColumns() { return m_tileSetColumns; }
+    const int& gridRows() { return m_gridRows; }
+    const int& gridColumns() { return m_gridColumns; }
+
     void saveToFile(const std::string& layoutFilename);
     
     void updateVertices();
@@ -52,6 +57,7 @@ public:
     }
     
     void addWallType(int index) { m_wallTypes.insert(index); }
+    void removeWallType(int index) { m_wallTypes.erase(index); }
 
     bool isWallType(int type) {
         return m_wallTypes.find(type) != m_wallTypes.end();
