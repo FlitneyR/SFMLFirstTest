@@ -146,6 +146,8 @@ int main() {
             } else it++;
         }
 
+        Orc::preventIntersection(orcs, deltaTime);
+
         window.clear();
 
         sf::Vector2f viewCenter = view.getCenter();

@@ -89,6 +89,8 @@ public:
 
     Orc();
 
+    static void preventIntersection(std::vector<Orc>& orcs, float deltaTime);
+
     sf::Vector2f getFacingDirection();
     sf::FloatRect getBounds();
     SpriteSheet& getCurrentSpriteSheet();

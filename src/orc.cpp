@@ -36,6 +36,37 @@ Orc::Orc() :
     m_attackSpriteSheet.m_loop = false;
 }
 
+void Orc::preventIntersection(std::vector<Orc>& orcs, float deltaTime) {
+    for (int i = 0; i + 1 < orcs.size(); i++)
+    for (int j = i + 1; j < orcs.size(); j++) {
+        Orc& orc1 = orcs[i];
+        Orc& orc2 = orcs[j];
+
+        const sf::FloatRect& orc1Bounds = orc1.getBounds();
+        const sf::FloatRect& orc2Bounds = orc2.getBounds();
+
+        if (orc1Bounds.intersects(orc2Bounds)) {
+            sf::Vector2f deltaPosition = orc2.m_position - orc1.m_position;
+
+            deltaPosition.x = deltaPosition.x > 0.f ?
+                orc1Bounds.left + orc1Bounds.width - orc2Bounds.left :
+                orc2Bounds.left + orc2Bounds.width - orc1Bounds.left ;
+            
+            deltaPosition.y = deltaPosition.y > 0.f ?
+                orc1Bounds.top + orc1Bounds.height - orc2Bounds.top :
+                orc2Bounds.top + orc2Bounds.height - orc1Bounds.top ;
+            
+            if (std::abs(deltaPosition.x) > std::abs(deltaPosition.y))
+                deltaPosition.x = 0.f;
+            else
+                deltaPosition.y = 0.f;
+
+            orc1.m_position += deltaPosition * deltaTime * 15.f;
+            orc2.m_position -= deltaPosition * deltaTime * 15.f;
+        }
+    }
+}
+
 sf::Vector2f Orc::getFacingDirection() {
     static bool facingRight = true;
     static bool facingForward = true;
